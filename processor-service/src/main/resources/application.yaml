@@ -17,3 +17,5 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
       properties:
         spring.json.add.type.headers: false
+  mongodb:
+    uri: mongodb://localhost:27018/paystream

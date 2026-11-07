@@ -4,6 +4,8 @@ import com.paystream.events.PaymentFailed;
 import com.paystream.events.PaymentProcessed;
 import com.paystream.events.PaymentValidated;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -18,16 +20,25 @@ public class PaymentProcessorListener {
     private static final BigDecimal LIMIT = new BigDecimal("50000");
 
     private final KafkaTemplate<String, Object> kafka;
+    private final MongoTemplate mongo;
 
-    public PaymentProcessorListener(KafkaTemplate<String, Object> kafka) {
+    public PaymentProcessorListener(KafkaTemplate<String, Object> kafka, MongoTemplate mongo) {
         this.kafka = kafka;
+        this.mongo = mongo;
     }
 
     @KafkaListener(topics = "payments.validated")
     public void onValidated(ConsumerRecord<String, PaymentValidated> rec) {
         PaymentValidated p = rec.value();
 
-        // Stand-in for a real bank or gateway call
+        // Idempotency check: first writer wins, a second insert fails
+        try {
+            mongo.insert(new ProcessedPayment(p.paymentId(), Instant.now()));
+        } catch (DuplicateKeyException e) {
+            System.out.println("DUPLICATE skipped " + p.paymentId());
+            return;
+        }
+
         if (p.amount().compareTo(LIMIT) > 0) {
             kafka.send("payments.failed", p.paymentId(),
                     new PaymentFailed(p.paymentId(), "exceeds transaction limit", Instant.now()));
