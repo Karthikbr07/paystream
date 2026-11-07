@@ -20,6 +20,7 @@
         <module>common-events</module>
         <module>payment-api</module>
         <module>validator-service</module>
+        <module>processor-service</module>
     </modules>
 
     <properties>
