@@ -7,9 +7,8 @@
         <artifactId>paystream</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
-	<groupId>com.paystream</groupId>
+
 	<artifactId>payment-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>
 	<url/>
@@ -33,6 +32,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-kafka</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>com.paystream</groupId>
+            <artifactId>common-events</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
